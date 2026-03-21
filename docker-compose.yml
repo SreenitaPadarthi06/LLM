@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  prompt-router:
+    build: .
+    image: prompt-router:latest
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MODEL_CLASSIFIER=${MODEL_CLASSIFIER:-gpt-4o-mini}
+      - MODEL_RESPONDER=${MODEL_RESPONDER:-gpt-4o-mini}
+      - CONFIDENCE_THRESHOLD=${CONFIDENCE_THRESHOLD:-0.7}
+      - LOG_FILE=/app/logs/route_log.jsonl
+    volumes:
+      # Persist the JSONL log on the host so it survives container restarts.
+      - ./logs:/app/logs
+    stdin_open: true # keep STDIN open for interactive CLI
+    tty: true # allocate a pseudo-TTY
+
+  # ── Optional: run the test suite and exit ─────────────────────────────────
+  test:
+    build: .
+    image: prompt-router:latest
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MODEL_CLASSIFIER=${MODEL_CLASSIFIER:-gpt-4o-mini}
+      - MODEL_RESPONDER=${MODEL_RESPONDER:-gpt-4o-mini}
+      - CONFIDENCE_THRESHOLD=${CONFIDENCE_THRESHOLD:-0.7}
+      - LOG_FILE=/app/logs/route_log.jsonl
+    volumes:
+      - ./logs:/app/logs
+    command: ["python", "test_router.py"]
+    profiles:
+      - test
